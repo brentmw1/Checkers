@@ -288,6 +288,26 @@ public class CheckersGame extends Application
         primaryStage.show();
     }
     
+    public static void saveGame (int numMoves) 
+    throws IOException {
+        String fileName;
+        Scanner stdin = new Scanner(System.in);
+        PrintStream P;
+        System.out.println("Enter the name you want to store your game with: ");
+        fileName = stdin.nextLine();
+        P = new PrintStream(fileName + ".text");
+        
+        P.println(_________________________Black Name);
+        P.println(_________________________Red Name);
+        P.println(____________s or c___________________);
+        
+        for (int i = 0; i < nunMoves; i++) {
+            P.println(moves[i].name);
+        }
+        P.close();
+        System.out.println("Game Saved.");
+}
+    
     public static void main(String [] args)
     {
         Scanner in = new Scanner(System.in);
