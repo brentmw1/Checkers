@@ -300,9 +300,11 @@ public class CheckersGame extends Application
         P.println(_________________________Black Name);
         P.println(_________________________Red Name);
         P.println(____________s or c___________________);
-        
+        if (board is custom___________) {
+            SAVE START CONFIGURATION
+        }
         for (int i = 0; i < nunMoves; i++) {
-            P.println(moves[i].name);
+            P.println(moves[i].COORDINATES);
         }
         P.close();
         System.out.println("Game Saved.");
