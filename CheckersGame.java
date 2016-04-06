@@ -288,27 +288,49 @@ public class CheckersGame extends Application
         primaryStage.show();
     }
     
-    public static void saveGame (int numMoves) 
+    public static void saveGame (int numMoves, String blackName, String redName, char config, ARRAYLIST??????????????) *************
     throws IOException {
         String fileName;
         Scanner stdin = new Scanner(System.in);
         PrintStream P;
+        
         System.out.println("Enter the name you want to store your game with: ");
         fileName = stdin.nextLine();
         P = new PrintStream(fileName + ".text");
-        
-        P.println(_________________________Black Name);
-        P.println(_________________________Red Name);
-        P.println(____________s or c___________________);
-        if (board is custom___________) {
-            SAVE START CONFIGURATION
+        P.println(blackName);
+        P.println(redName);
+        P.println(config);
+        if (config == c) {
+            SAVE START CONFIGURATION******************************************************
         }
         for (int i = 0; i < nunMoves; i++) {
-            P.println(moves[i].COORDINATES);
+            P.println(ArrayList[i]);******************************************************************************
         }
         P.close();
         System.out.println("Game Saved.");
-}
+    }
+    
+    public static void loadGame (String fileName) throws IOException {
+    BufferedReader in = new BufferedReader(new FileReader(fileName + ".text"));
+    String currentLine;
+    int i;
+    
+    i = 0;
+    blackName = in.readLine();
+    redName = in.readLine();
+    config = in.readline();
+    if (config == c) {
+        SOMEHOW READ IN THE STARTING CONFIGURATION*******************************************************
+        USING THE NEXT in.readLine();
+    }
+    currentLine = in.readLine();
+    while(currentLine != null) {
+        Arraylist[i] = currentLine;
+        currentLine = in.readLine();
+        i++;
+    }
+    in.close();
+    }
     
     public static void main(String [] args)
     {
