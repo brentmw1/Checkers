@@ -424,10 +424,6 @@ public class CheckersGame extends Application
     i = 0;
     blackName = in.readLine();
     redName = in.readLine();
-    /*if (config.equals("c")) {
-        SOMEHOW READ IN THE STARTING CONFIGURATION*******************************************************
-        USING THE NEXT in.readLine();
-    }*/
     currentLine = in.readLine();
     while(!currentLine.equals("End")) {
         move.add(currentLine);
@@ -448,12 +444,12 @@ public class CheckersGame extends Application
         pieces.add(new CheckersPiece(true, false, 1, 1));
         pieces.add(new CheckersPiece(false, false, 2, 2));
         pieces.add(new CheckersPiece(false, false, 5, 5));
-        CheckersGame game = new CheckersGame();
+        CheckersGame game = new CheckersGame(pieces);
         game.board.printBoard();
-        boolean isRedTurn = true;
+        boolean isRedTurn = false;
         game.currentMove = 0;
-        try {game.loadGame();
-        }catch(IOException e){}
+        /*try {game.loadGame();
+        }catch(IOException e){}*/
         
         for (int i = 0; i < 3; i++) {
             game.turn();
@@ -461,13 +457,16 @@ public class CheckersGame extends Application
             isRedTurn = !isRedTurn;
             game.currentMove++;
         }
-        try {game.saveGame();
-        }catch(IOException e){}
+        /*try {game.saveGame();
+        }catch(IOException e){}*/
         game.currentMove = 0;
 
         /*while (!game.isGameWon(isRedTurn))
         {
-            
+            game.turn(isRedTurn);
+            game.board.printBoard();
+            isRedTurn = !isRedTurn;
+            game.currentMove++;
         }
         setNames();
         try {loadGame();
@@ -678,82 +677,41 @@ class CheckersPiece
         this.column = column;
     }
     
-    /*
-    *Creates a blank checkers piece
-    *No Parameters
-    */
-    public CheckersPiece()
-    {
-        
-    }
-    
-    /*
-    *returns the state of the variable is red
-    *Return: true for red and false for black
-    */
     public boolean isRed()
     {
         return isRed;
     }
     
-    /*
-    *sets the color of the checkers piece
-    *Parameters: isRed sets color, true for red, false for black
-    */
     public void setColor(boolean isRed)
     {
         this.isRed = isRed;
     }
     
-    /*
-    *returns if the checkers piece is a king
-    *return: true for king, false for normal
-    */
     public boolean isKing()
     {
         return isKing;
     }
     
-    /*
-    *sets if the checkers piece is a king
-    *Parameters: isKing sets if the piece is a king
-    */
     public void setKing(boolean isKing)
     {
         this.isKing = isKing;
     }
     
-    /*
-    *returns the row number
-    *Return: The row number
-    */
     public int getRow()
     {
         return row;
     }
     
-    /*
-    *sets the row number
-    *Parameters: row sets the row numbers
-    */
     public void setRow(int row)
     {
         this.row = row;
     }
     
-    /*
-    *returns the column number
-    *Return: column number
-    */
     public int getColumn()
     {
         return column;
     }
     
-    /*
-    *sets the row number
-    *Parameters: column sets the column number
-    */
     public void setColumn(int column)
     {
         this.column = column;
