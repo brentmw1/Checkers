@@ -176,26 +176,24 @@ public class CheckersGame
             toColumn;
         String cMove;
         cMove = moves.get(currentMove);
-        System.out.println(moves.size());
-        System.out.println(currentMove);
         fromRow = Integer.parseInt(cMove.substring(0, 1));
         fromColumn = Integer.parseInt(cMove.substring(2, 3));
         toRow = Integer.parseInt(cMove.substring(4, 5));
         toColumn = Integer.parseInt(cMove.substring(6));
-            pieces.get(findPieceID(fromRow, fromColumn)).setRow(toRow);
-            pieces.get(findPieceID(toRow, fromColumn)).setColumn(toColumn);
-            if (toRow == 1 && !pieces.get(findPieceID(toRow, toColumn)).isRed())
-            {
-                pieces.get(findPieceID(toRow, toColumn)).setKing(true);
-            }
-            else if (toRow == 8 && pieces.get(findPieceID(toRow, toColumn)).isRed())
-            {
-                pieces.get(findPieceID(toRow, toColumn)).setKing(true);
-            }
-            if (Math.abs(toRow-fromRow) == 2)
-            {   
-                pieces.remove(findPieceID(fromRow+(toRow-fromRow)/2, fromColumn+(toColumn-fromColumn)/2));
-            }
+        pieces.get(findPieceID(fromRow, fromColumn)).setRow(toRow);
+        pieces.get(findPieceID(toRow, fromColumn)).setColumn(toColumn);
+        if (toRow == 1 && !pieces.get(findPieceID(toRow, toColumn)).isRed())
+        {
+            pieces.get(findPieceID(toRow, toColumn)).setKing(true);
+        }
+        else if (toRow == 8 && pieces.get(findPieceID(toRow, toColumn)).isRed())
+        {
+            pieces.get(findPieceID(toRow, toColumn)).setKing(true);
+        }
+        if (Math.abs(toRow-fromRow) == 2)
+        {   
+            pieces.remove(findPieceID(fromRow+(toRow-fromRow)/2, fromColumn+(toColumn-fromColumn)/2));
+        }
     }
     
     public void addMove(int fromRow, int fromColumn, int toRow, int toColumn) {

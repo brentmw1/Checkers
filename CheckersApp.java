@@ -123,10 +123,28 @@ public class CheckersApp extends Application{
         game = new CheckersGame();
         getBlackName();
         getRedName();
+        updatePlayerNames();
+        updatePlayerTurn();
         isGameRunning = true;
         isRedTurn = false;
         isFirstSelected = false;
+        saveName = null;
         setPieces();
+    }
+    
+    public void updatePlayerNames() {
+        playerNames.setText("Black: " + game.getBlackName() + "\nRed: " + game.getRedName());
+    }
+    
+    public void updatePlayerTurn() {
+        String displayName;
+        
+        displayName = new String(isRedTurn ? game.getRedName() : game.getBlackName());
+        if (displayName.length() > 6) {
+            displayName = displayName.substring(0, 7);
+        }
+        playerTurn.setText(displayName);
+        playerTurn.setFill(isRedTurn ? redPiece : blackPiece);
     }
     
     @Override
@@ -142,11 +160,11 @@ public class CheckersApp extends Application{
         toolBar = new ToolBar(saveButton, newButton, openButton);
         mainPane = new VBox();
         board = new GridPane();
-        playerNames = new Text(game.getBlackName() + "\n" + game.getRedName());
-        playerNames.setFont(new Font(25));
-        playerNames.setWrappingWidth(180);
+        playerNames = new Text("Black: \nRed: ");
+        playerNames.setWrappingWidth(170);
+        playerNames.setFont(new Font(27));
         playerTurn = new Text("Black");
-        playerTurn.setFont(new Font(60));
+        playerTurn.setFont(new Font(50));
         playerTurn.setFill(Color.BLACK);
         playerTurn.setWrappingWidth(180);
         nextButton = new Button("Next");
@@ -157,13 +175,14 @@ public class CheckersApp extends Application{
         tiles = new Rectangle[64];
         redPiece = Color.RED;
         blackPiece = Color.BLACK;
-        redTile = Color.BLUE;
+        redTile = Color.RED;
         blackTile = Color.BLACK;
-        selected.setOffsetY(1f);
-        selected.setOffsetX(1f);
+        selected.setOffsetY(0f);
+        selected.setOffsetX(0f);
         selected.setColor(Color.YELLOW);
         selected.setWidth(200);
         selected.setHeight(200);
+        updatePlayerNames();
         newButton.setOnAction(event -> {
             clearBoard();
             newGame(); 
@@ -214,6 +233,7 @@ public class CheckersApp extends Application{
                     clearBoard();
                     setPieces();
                     isFirstSelected = false;
+                    updatePlayerTurn();
                 } else {
                     fromRow = row;
                     fromColumn = column;
