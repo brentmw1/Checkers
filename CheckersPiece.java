@@ -90,4 +90,9 @@ public class CheckersPiece {
     public void setColumn(int column) {
         this.column = column;
     }
+    
+    public void setPosition(int row, int column) {
+        setRow(row);
+        setColumn(column);
+    }
 }

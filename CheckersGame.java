@@ -1,82 +1,123 @@
-/**
- *
- * @author Mark Monarch
+/*
+ * Written by Mark Monarch, Brent Wickenheiser, and Noah Whitehill
  */
 
 import java.util.*;
-import javafx.application.Application;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
-import javafx.scene.control.*;
-import javafx.scene.layout.*;
-import javafx.scene.shape.*;
-import javafx.scene.paint.*;
+import java.io.*;
 
-public class CheckersGame extends Application
+public class CheckersGame
 {
-    final int MAX_TILE_SIZE = 80;
-    final int PREF_TILE_SIZE = 40;
-    final int MIN_TILE_SIZE = 32;
     
     private ArrayList<CheckersPiece> pieces;    //The checkers pieces currently in the game
-    private CheckersBoard board;                 //The checkers board for the game
-    private Stage primaryStage;
-    private ToolBar topToolBar;
-    private Pane gameBoard;
-    private VBox gameControlPane;
-    private VBox rightPane;
-    private HBox infoPane;
+    private ArrayList<String> moves;            //The moves that happen in a game
+    private String blackName;                   //Player 1's name
+    private String redName;                     //Player 2's name
+    private int numMoves;                       //The total number of moves that have happened in a game
+    private int currentMove;                    //The current move that is being accessed
+    private int mandatoryPieceID;               //A double jumps piece ID
     
     /*
     *Creates a standard checkers game with 12 black and 12 red checkers pieces
     */
-    public CheckersGame() {
-        pieces = new ArrayList<CheckersPiece>(0);
-        for (int i = 1; i <= 8; i++) {
-            for (int j = 1; j <= 8; j++) {
-                if (i != 4 && i != 5) {
-                    if (i%2 == 1 && j%2 == 1) {
+    public CheckersGame()
+    {
+        pieces = new ArrayList<>(0);
+        moves = new ArrayList<>(0);
+        for (int i = 1; i <= 8; i++)
+        {
+            for (int j = 1; j <= 8; j++)
+            {
+                if (i != 4 && i != 5)
+                {
+                    if (i%2 == 1 && j%2 == 1)
+                    {
                         pieces.add(new CheckersPiece(i < 4, false, i, j));
-                    } else if (i%2 == 0 && j%2 == 0) {
+                    }
+                    else if (i%2 == 0 && j%2 == 0)
+                    {
                         pieces.add(new CheckersPiece(i < 4, false, i, j));
                     }
                 }
             }
         }
-        board = new CheckersBoard(pieces);
+        mandatoryPieceID = -1;
     }
     
     /*
     *Creates a checkers game with an array of checkers pieces
     *Parameters: pieces is an arraylist of checkers pieces
     */
-    public CheckersGame(ArrayList<CheckersPiece> pieces) {
+    public CheckersGame(ArrayList<CheckersPiece> pieces)
+    {
+        moves = new ArrayList<>(0);
         this.pieces = pieces;
-        board = new CheckersBoard(this.pieces);
+        mandatoryPieceID = -1;
+    }
+    
+    public void setBlackName(String name) {
+        blackName = name;
+    }
+    
+    public String getBlackName() {
+        return blackName;
+    }
+    
+    public void setRedName(String name) {
+        redName = name;
+    }
+    
+    public String getRedName() {
+        return redName;
+    }
+    
+    public void setMandatoryID(int ID) {
+        mandatoryPieceID = ID;
+    }
+    
+    public int getMandatoryID() {
+        return mandatoryPieceID;
+    }
+    
+    public void movePiece(int fromRow, int fromColumn, int toRow, int toColumn) {
+        pieces.get(findPieceID(fromRow, fromColumn)).setPosition(toRow, toColumn);
+        if ((pieces.get(findPieceID(toRow, toColumn)).isRed() && toRow == 8) || (!pieces.get(findPieceID(toRow, toColumn)).isRed() && toRow == 1)) {
+            pieces.get(findPieceID(toRow, toColumn)).setKing(true);
+        }
     }
     
     public boolean isMovePossible(boolean isRedTurn) {
         int row,
             column;
-        if (isJumpPossible(isRedTurn, 0) > -1) {
+        
+        if (isJumpPossible(isRedTurn, 0) > -1)
+        {
             return true;
         }
-        for (int i = 0; i < pieces.size(); i++) {
+        for (int i = 0; i < pieces.size(); i++)
+        {
             row = pieces.get(i).getRow();
             column = pieces.get(i).getColumn();
-            if (pieces.get(i).isRed() == isRedTurn) {
-                if ((pieces.get(i).isRed() || pieces.get(i).isKing()) && row < 8) {
-                    if (column > 1 && findPieceID(row+1, column-1) == -1) {
+            if (pieces.get(i).isRed() == isRedTurn)
+            {
+                if ((pieces.get(i).isRed() || pieces.get(i).isKing()) && row < 8)
+                {
+                    if (column > 1 && findPieceID(row+1, column-1) == -1)
+                    {
                         return true;
                     }
-                    if (column < 8 && findPieceID(row+1, column+1) == -1) {
+                    if (column < 8 && findPieceID(row+1, column+1) == -1)
+                    {
                         return true;
                     }
                 }
-                if ((!pieces.get(i).isRed() || pieces.get(i).isKing()) && row > 1) {
-                    if (column > 1 && findPieceID(row-1, column-1) == -1) {
+                if ((!pieces.get(i).isRed() || pieces.get(i).isKing()) && row > 1)
+                {
+                    if (column > 1 && findPieceID(row-1, column-1) == -1)
+                    {
                         return true;
-                    } else if (column < 8 && findPieceID(row-1, column+1) == -1) {
+                    }
+                    else if (column < 8 && findPieceID(row-1, column+1) == -1)
+                    {
                         return true;
                     }
                 }
@@ -85,23 +126,27 @@ public class CheckersGame extends Application
         return false;
     }
     
-    public boolean isGameWon(boolean isRedTurn) {
+    public boolean isGameWon(boolean isRedTurn)
+    {
         boolean isBlack = false,
                 isRed = false;
-        for (int i = 0; i < pieces.size(); i++) {
-            if (pieces.get(i).isRed()) {
+        for (int i = 0; i < pieces.size(); i++)
+        {
+            if (pieces.get(i).isRed())
+            {
                 isRed = true;
-            } else if (!pieces.get(i).isRed()) {
+            }
+            else if (!pieces.get(i).isRed())
+            {
                 isBlack = true;
             }
-            if (isRed && isBlack) {
+            if (isRed && isBlack)
+            {
                 i = pieces.size();
             }
         }
-        if (!isRed || !isBlack) {
-            return true;
-        }
-        if (!isMovePossible(isRedTurn)) {
+        if (!isRed || !isBlack || !isMovePossible(isRedTurn))
+        {
             return true;
         }
         return false;
@@ -112,55 +157,107 @@ public class CheckersGame extends Application
     *Parameters: row is the row of the piece 1-8, column is the column of the piece 1-8
     *Return: returns the index of the piece, or -1 if no piece is there
     */
-    public int findPieceID(int row, int column) {
-        for (int i = 0; i < pieces.size(); i++) {
-            if (pieces.get(i).getRow() == row && pieces.get(i).getColumn() == column) {
+    public int findPieceID(int row, int column)
+    {
+        for (int i = 0; i < pieces.size(); i++)
+        {
+            if (pieces.get(i).getRow() == row && pieces.get(i).getColumn() == column)
+            {
                 return i;
             }
         }
         return -1;
     }
     
+    public void turn() {
+        int fromRow,
+            fromColumn,
+            toRow,
+            toColumn;
+        String cMove;
+        cMove = moves.get(currentMove);
+        System.out.println(moves.size());
+        System.out.println(currentMove);
+        fromRow = Integer.parseInt(cMove.substring(0, 1));
+        fromColumn = Integer.parseInt(cMove.substring(2, 3));
+        toRow = Integer.parseInt(cMove.substring(4, 5));
+        toColumn = Integer.parseInt(cMove.substring(6));
+            pieces.get(findPieceID(fromRow, fromColumn)).setRow(toRow);
+            pieces.get(findPieceID(toRow, fromColumn)).setColumn(toColumn);
+            if (toRow == 1 && !pieces.get(findPieceID(toRow, toColumn)).isRed())
+            {
+                pieces.get(findPieceID(toRow, toColumn)).setKing(true);
+            }
+            else if (toRow == 8 && pieces.get(findPieceID(toRow, toColumn)).isRed())
+            {
+                pieces.get(findPieceID(toRow, toColumn)).setKing(true);
+            }
+            if (Math.abs(toRow-fromRow) == 2)
+            {   
+                pieces.remove(findPieceID(fromRow+(toRow-fromRow)/2, fromColumn+(toColumn-fromColumn)/2));
+            }
+    }
+    
+    public void addMove(int fromRow, int fromColumn, int toRow, int toColumn) {
+        moves.add(fromRow + " " + fromColumn + " " + toRow + " " + toColumn);
+        numMoves++;
+    }
+    
     /*
     *Simulates a players turn
     *Parameters: isRedTurn indicates whose turn, true for red, false for black
     */
-    public void turn(boolean isRedTurn) {
+    public void turn(boolean isRedTurn)
+    {
         Scanner in = new Scanner(System.in);
         int fromRow,
             fromColumn,
             toRow,
             toColumn,
             mandatoryPieceID;
-        mandatoryPieceID = -1;
+        mandatoryPieceID = -2;
         boolean isValid;
         isValid = false;
-        while (!isValid) {
+        do
+        {
             fromRow = in.nextInt();
             fromColumn = in.nextInt();
             toRow = in.nextInt();
             toColumn = in.nextInt();
-            if (isValidMove(fromRow, fromColumn, toRow, toColumn, isRedTurn) && (mandatoryPieceID == -1 || mandatoryPieceID == findPieceID(fromRow, fromColumn))) {
+            if (isValidMove(fromRow, fromColumn, toRow, toColumn, isRedTurn) && (mandatoryPieceID == -2 || mandatoryPieceID == findPieceID(fromRow, fromColumn)))
+            {
+                moves.add(fromRow + " " + fromColumn + " " + toRow + " " + toColumn);
+                numMoves++;
                 isValid = true;
                 pieces.get(findPieceID(fromRow, fromColumn)).setRow(toRow);
                 pieces.get(findPieceID(toRow, fromColumn)).setColumn(toColumn);
-                if (toRow == 1 && !pieces.get(findPieceID(toRow, toColumn)).isRed()) {
+                if (toRow == 1 && !pieces.get(findPieceID(toRow, toColumn)).isRed())
+                {
                      pieces.get(findPieceID(toRow, toColumn)).setKing(true);
-                } else if (toRow == 8 && pieces.get(findPieceID(toRow, toColumn)).isRed()) {
+                }
+                else if (toRow == 8 && pieces.get(findPieceID(toRow, toColumn)).isRed())
+                {
                     pieces.get(findPieceID(toRow, toColumn)).setKing(true);
                 }
-                board.movePiece(fromRow, fromColumn, toRow, toColumn);
-                if (Math.abs(toRow-fromRow) == 2) {   
+                if (Math.abs(toRow-fromRow) == 2)
+                {   
                     pieces.remove(findPieceID(fromRow+(toRow-fromRow)/2, fromColumn+(toColumn-fromColumn)/2));
-                    board.removePiece(fromRow-(fromRow-toRow)/2, fromColumn-(fromColumn-toColumn)/2);
-                    if (isJumpPossible(isRedTurn, findPieceID(toRow, toColumn)) == findPieceID(toRow, toColumn)) {
+                    if (isJumpPossible(isRedTurn, findPieceID(toRow, toColumn)) == findPieceID(toRow, toColumn))
+                    {
+                        System.out.println(findPieceID(toRow, toColumn));
                         isValid = false;
                         mandatoryPieceID = findPieceID(toRow, toColumn);
-                        board.printBoard();
                     }
                 }
             }
+        } while (!isValid);
+    }
+    
+    public boolean isDoubleJumpPossible(boolean isRedTurn, int jumpID) {
+        if (isJumpPossible(isRedTurn, jumpID) == jumpID) {
+            return true;
         }
+        return false;
     }
     
     /*
@@ -168,25 +265,35 @@ public class CheckersGame extends Application
     *Parameters: isRedTurn indicates whose turn it is, true for red, false for black, startPoint indicates where in pieces to begin the search
     *Return: returns the index of a possible jump, or -1 if no jump is possible
     */
-    public int isJumpPossible(boolean isRedTurn, int startPoint) {
+    public int isJumpPossible(boolean isRedTurn, int startPoint)
+    {
         int row,
             column;
-        for (int i = startPoint; i < pieces.size(); i++) {
+        for (int i = startPoint; i < pieces.size(); i++)
+        {
             row = pieces.get(i).getRow();
             column = pieces.get(i).getColumn();
-            if (pieces.get(i).isRed() == isRedTurn) {
-                if ((pieces.get(i).isRed() || pieces.get(i).isKing()) && row < 7) {
-                    if (column > 2 && findPieceID(row+1, column-1) > -1 && pieces.get(findPieceID(row+1, column-1)).isRed() != isRedTurn && findPieceID(row+2, column-2) == -1) {
+            if (pieces.get(i).isRed() == isRedTurn)
+            {
+                if ((pieces.get(i).isRed() || pieces.get(i).isKing()) && row < 7)
+                {
+                    if (column > 2 && findPieceID(row+1, column-1) > -1 && pieces.get(findPieceID(row+1, column-1)).isRed() != isRedTurn && findPieceID(row+2, column-2) == -1)
+                    {
                         return i;
                     }
-                    if (column < 7 && findPieceID(row+1, column+1) > -1 && pieces.get(findPieceID(row+1, column+1)).isRed() != isRedTurn && findPieceID(row+2, column+2) == -1) {
+                    if (column < 7 && findPieceID(row+1, column+1) > -1 && pieces.get(findPieceID(row+1, column+1)).isRed() != isRedTurn && findPieceID(row+2, column+2) == -1)
+                    {
                         return i;
                     }
                 }
-                if ((!pieces.get(i).isRed() || pieces.get(i).isKing()) && row > 2) {
-                    if (column > 2 && findPieceID(row-1, column-1) > -1 && pieces.get(findPieceID(row-1, column-1)).isRed() != isRedTurn && findPieceID(row-2, column-2) == -1) {
+                if ((!pieces.get(i).isRed() || pieces.get(i).isKing()) && row > 2)
+                {
+                    if (column > 2 && findPieceID(row-1, column-1) > -1 && pieces.get(findPieceID(row-1, column-1)).isRed() != isRedTurn && findPieceID(row-2, column-2) == -1)
+                    {
                         return i;
-                    } else if (column < 7 && findPieceID(row-1, column+1) > -1 && pieces.get(findPieceID(row-1, column+1)).isRed() != isRedTurn && findPieceID(row-2, column+2) == -1) {
+                    }
+                    else if (column < 7 && findPieceID(row-1, column+1) > -1 && pieces.get(findPieceID(row-1, column+1)).isRed() != isRedTurn && findPieceID(row-2, column+2) == -1)
+                    {
                         return i;
                     }
                 }
@@ -200,23 +307,32 @@ public class CheckersGame extends Application
     *Parameters: fromRow is the original row, fromColumn is the original column, toRow is the final row, toColumn is the final column, isRedTurn indicates whose turn it is, true for red, false for black
     *Return: returns true is the desired move is legal, and false if it is not
     */
-    public boolean isValidMove(int fromRow, int fromColumn, int toRow, int toColumn, boolean isRedTurn) {
+    public boolean isValidMove(int fromRow, int fromColumn, int toRow, int toColumn, boolean isRedTurn)
+    {
         int i = findPieceID(fromRow, fromColumn);
-        if (i > -1 && toRow > 0 && toRow < 9 && toColumn > 0 && toColumn < 9 && isRedTurn == pieces.get(i).isRed()) {
-            if (isJumpPossible(isRedTurn, 0) == -1 && Math.abs(fromRow-toRow) == 1 && Math.abs(fromColumn-toColumn) == 1) {
-                if ((pieces.get(i).isRed() || pieces.get(i).isKing()) && fromRow < toRow) {
+        if (i > -1 && toRow > 0 && toRow < 9 && toColumn > 0 && toColumn < 9 && isRedTurn == pieces.get(i).isRed() && (i == mandatoryPieceID || mandatoryPieceID == -1))
+        {
+            if (isJumpPossible(isRedTurn, 0) == -1 && Math.abs(fromRow-toRow) == 1 && Math.abs(fromColumn-toColumn) == 1 && findPieceID(toRow, toColumn) == -1)
+            {
+                if ((pieces.get(i).isRed() || pieces.get(i).isKing()) && fromRow < toRow)
+                {
                     return true;
                 }
-                if ((!pieces.get(i).isRed() || pieces.get(i).isKing()) && fromRow > toRow) {
+                if ((!pieces.get(i).isRed() || pieces.get(i).isKing()) && fromRow > toRow)
+                {
                     return true;
                 }
             }
-            if (isJumpPossible(isRedTurn, 0) > -1) {
-                if (findPieceID(toRow, toColumn) == -1 && Math.abs(fromRow-toRow) == 2 && Math.abs(fromColumn-toColumn) == 2 && findPieceID(fromRow-(fromRow-toRow)/2, fromColumn-(fromColumn-toColumn)/2) > -1 && pieces.get(findPieceID(fromRow-(fromRow-toRow)/2, fromColumn-(fromColumn-toColumn)/2)).isRed() != isRedTurn) {
-                    if ((pieces.get(i).isRed() || pieces.get(i).isKing()) && fromRow < toRow) {
+            if (isJumpPossible(isRedTurn, 0) > -1)
+            {
+                if (findPieceID(toRow, toColumn) == -1 && Math.abs(fromRow-toRow) == 2 && Math.abs(fromColumn-toColumn) == 2 && findPieceID(fromRow-(fromRow-toRow)/2, fromColumn-(fromColumn-toColumn)/2) > -1 && pieces.get(findPieceID(fromRow-(fromRow-toRow)/2, fromColumn-(fromColumn-toColumn)/2)).isRed() != isRedTurn)
+                {
+                    if ((pieces.get(i).isRed() || pieces.get(i).isKing()) && fromRow < toRow)
+                    {
                         return true;
                     }
-                    if ((!pieces.get(i).isRed() || pieces.get(i).isKing()) && fromRow > toRow) {
+                    if ((!pieces.get(i).isRed() || pieces.get(i).isKing()) && fromRow > toRow)
+                    {
                         return true;
                     }
                 }
@@ -229,86 +345,55 @@ public class CheckersGame extends Application
     *returns an arraylist of the pieces on the board
     *Return: returns the pieces on the board
     */
-    public ArrayList<CheckersPiece> getPieces() {
+    public ArrayList<CheckersPiece> getPieces()
+    {
         return pieces;
     }
     
-    public void start(Stage primaryStage) {
-        this.primaryStage = primaryStage;
-        gameBoard = new Pane();
-        gameBoard.setPrefSize(320, 320);
-        gameBoard.setMaxSize(640, 640);
-        gameBoard.setMinSize(240, 240);
-        gameControlPane = new VBox(new Button("Button 1"));
-        gameControlPane.setPrefSize(100, 400);
-        gameControlPane.setMaxSize(200, 800);
-        gameControlPane.setMinSize(50, 200);
-        rightPane = new VBox(new Circle(10));
-        rightPane.setPrefSize(100, 400);
-        rightPane.setMaxSize(200, 800);
-        rightPane.setMinSize(50, 200);
-        infoPane = new HBox();
-        infoPane.setPrefSize(600, 100);
-        int sides = 40;
-        Rectangle square[] = new Rectangle[64];
-        for (int i = 0; i < 8; i++)
-        {
-            for (int j = 0; j < 8; j++)
-            {
-                if (i%2 == j%2)
-                {
-                    square[i*8+j] = new Rectangle(sides, sides, Color.BLACK);                    
-                }
-                else
-                {
-                    square[i*8+j] = new Rectangle(sides, sides, Color.RED);
-                }
-                square[i*8+j].widthProperty().bind(gameBoard.widthProperty().divide(8));
-                square[i*8+j].heightProperty().bind(gameBoard.widthProperty().divide(8));
-                square[i*8+j].xProperty().bind(gameBoard.widthProperty().multiply((double)j/8.0));
-                square[i*8+j].yProperty().bind(gameBoard.widthProperty().multiply((double)i/8.0));
+    public void saveGame (String fileName) {
+        PrintStream P;
+        
+        try {
+            P = new PrintStream(fileName);
+            P.println(blackName);
+            P.println(redName);
+            for (int i = 0; i < moves.size(); i++) {
+                P.println(moves.get(i));
             }
+            P.println("End");
+            P.close();
+        } catch (IOException e) {
+            System.out.println(e);
         }
-        gameBoard.getChildren().addAll(square);
-        Button saveButton = new Button("Save");
-        Button newButton = new Button("New");
-        Button openButton = new Button("Open");
-        Button settingsButton = new Button("Settings");
-        topToolBar = new ToolBar();
-        topToolBar.getItems().addAll(saveButton, newButton, openButton, settingsButton);
-        BorderPane pane = new BorderPane();
-        pane.setTop(topToolBar);
-        pane.setLeft(gameControlPane);
-        pane.setCenter(gameBoard);
-        pane.setRight(rightPane);
-        pane.setBottom(infoPane);
-        Scene scene = new Scene(pane, 520, 480);
-        primaryStage.setScene(scene);
-        primaryStage.setTitle("Checkers");
-        primaryStage.show();
     }
     
-    public static void main(String [] args)
-    {
-        Scanner in = new Scanner(System.in);
-        Application.launch(args);
-        
-        ArrayList<CheckersPiece> pieces = new ArrayList<CheckersPiece>(0);
-        pieces.add(new CheckersPiece(true, false, 2, 4));
-        pieces.add(new CheckersPiece(true, false, 1, 1));
-        pieces.add(new CheckersPiece(false, false, 3, 5));
-        pieces.add(new CheckersPiece(false, false, 5, 7));
-        pieces.add(new CheckersPiece(false, false, 7, 7));
-        pieces.add(new CheckersPiece(false, false, 7, 5));
-        pieces.add(new CheckersPiece(false, false, 5, 3));
-        CheckersGame game = new CheckersGame(pieces);
-        game.board.printBoard();
-        boolean isRedTurn = true;
-        while (!game.isGameWon(isRedTurn))
-        {
-            game.turn(isRedTurn);
-            game.board.printBoard();
-            isRedTurn = !isRedTurn;
+    public void loadGame (String fileName) {
+        BufferedReader in;
+        String currentLine;
+        int i;
+
+        moves = new ArrayList<>(0);
+        try {
+            in = new BufferedReader(new FileReader(fileName + ".che"));
+            i = 0;
+            blackName = in.readLine();
+            redName = in.readLine();
+            currentLine = in.readLine();
+            while(!currentLine.equals("End")) {
+                moves.add(currentLine);
+                currentLine = in.readLine();
+                i++;
+                System.out.println(currentLine);
+            }
+            in.close();
+        } catch (IOException e) {
+            System.out.println(e);
         }
     }
+    
+    public void printBoard() {
+        CheckersBoard print = new CheckersBoard(pieces);
+        print.printBoard();
+    }
 }
+ 
