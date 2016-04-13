@@ -36,7 +36,9 @@ public class CheckersApp extends Application{
     private GridPane board;
     private Button nextButton;
     private HBox display;
-    private Text playerNames;
+    private VBox playerNames;
+    private Text blackDisplay;
+    private Text redDisplay;
     private Text playerTurn;
     private ArrayList<Circle> gamePieces;
     private Rectangle [] tiles;
@@ -132,8 +134,9 @@ public class CheckersApp extends Application{
         setPieces();
     }
     
-    public void updatePlayerNames() {
-        playerNames.setText("Black: " + game.getBlackName() + "\nRed: " + game.getRedName());
+    public void updatePlayerNames() { 
+        blackDisplay.setText("Black: " + game.getBlackName());
+        redDisplay.setText("Red: " + game.getRedName());
     }
     
     public void updatePlayerTurn() {
@@ -151,20 +154,23 @@ public class CheckersApp extends Application{
     public void start(Stage primaryStage) {
         Rectangle rect;
         boolean isRed;
-       
+
         game = new CheckersGame();
         this.primaryStage = primaryStage;
         saveButton = new Button("Save");
         newButton = new Button("New");
         openButton = new Button("Open");
         toolBar = new ToolBar(saveButton, newButton, openButton);
+        toolBar.setMinHeight(80);
         mainPane = new VBox();
         board = new GridPane();
-        playerNames = new Text("Black: \nRed: ");
-        playerNames.setWrappingWidth(170);
-        playerNames.setFont(new Font(27));
+        playerNames = new VBox();
+        blackDisplay = new Text("Black");
+        redDisplay = new Text("Red");
+        playerNames.setMaxWidth(170);
+        playerNames.setMinWidth(170);
         playerTurn = new Text("Black");
-        playerTurn.setFont(new Font(50));
+        playerTurn.setFont(new Font(60));
         playerTurn.setFill(Color.BLACK);
         playerTurn.setWrappingWidth(180);
         nextButton = new Button("Next");
@@ -175,13 +181,21 @@ public class CheckersApp extends Application{
         tiles = new Rectangle[64];
         redPiece = Color.RED;
         blackPiece = Color.BLACK;
-        redTile = Color.RED;
-        blackTile = Color.BLACK;
-        selected.setOffsetY(0f);
-        selected.setOffsetX(0f);
+        redTile = Color.WHEAT;
+        blackTile = Color.SIENNA;
+        selected.setOffsetY(1f);
+        selected.setOffsetX(1f);
         selected.setColor(Color.YELLOW);
-        selected.setWidth(200);
-        selected.setHeight(200);
+        selected.setWidth(50);
+        selected.setHeight(50);
+        nextButton.setOnAction(event -> {
+            try{
+            game.turn();
+            clearBoard();
+            setPieces();
+            }catch(Exception e){}
+            isGameRunning = true;
+        });
         updatePlayerNames();
         newButton.setOnAction(event -> {
             clearBoard();
@@ -240,7 +254,7 @@ public class CheckersApp extends Application{
                     isFirstSelected = true;
                     tiles[(column-1)*8 + (row-1)].setEffect(selected);
                 }
-                if (game.isGameWon(!isRedTurn)) {
+                if (game.isGameWon(isRedTurn)) {
                     System.out.println("Won");
                     isGameRunning = false;
                 }
@@ -248,7 +262,7 @@ public class CheckersApp extends Application{
         });
         this.primaryStage.setTitle("Checkers");
         mainPane.getChildren().addAll(toolBar, board, display);
-        this.primaryStage.setScene(new Scene(mainPane, 488, 600));
+        this.primaryStage.setScene(new Scene(mainPane, 488, 650));
         this.primaryStage.show();
     }
     
@@ -308,13 +322,23 @@ public class CheckersApp extends Application{
         Text instructions;
         TextField fileName;
         
+        game = new CheckersGame();
         loadGame = new Stage();
         pane = new StackPane();
         OK = new Button("OK");
         instructions = new Text("Enter The Name Of The Game You Wish To Load");
         fileName = new TextField();
         OK.setOnAction(event -> {
-            
+            String name;
+            name = fileName.getText();
+            game.loadGame(name);
+            clearBoard();
+            setPieces();
+            if (game.getNumMoves() % 2 == 1)
+                isRedTurn = true;
+            else 
+                isRedTurn = false;
+            loadGame.close();
         });
         pane.getChildren().addAll(instructions, fileName, OK);
         pane.setAlignment(instructions, Pos.TOP_CENTER);
@@ -325,7 +349,11 @@ public class CheckersApp extends Application{
     }
     
     public void loadGameToEnd() {
-        
+        loadGame();
+        game.runThrough();
+        clearBoard();
+        setPieces();
+        isGameRunning = true;
     }
     
     public static void main(String [] args) {
