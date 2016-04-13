@@ -199,6 +199,10 @@ public class CheckersGame
         }        
     }
     
+    public void incrementMove() {
+        currentMove++;
+    }
+    
     public void addMove(int fromRow, int fromColumn, int toRow, int toColumn) {
         moves.add(fromRow + " " + fromColumn + " " + toRow + " " + toColumn);
         numMoves++;
