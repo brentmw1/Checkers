@@ -54,6 +54,10 @@ public class CheckersGame
         mandatoryPieceID = -1;
     }
     
+    public int getNumMoves() {
+        return moves.size();
+    }
+    
     public void setBlackName(String name) {
         blackName = name;
     }
@@ -180,8 +184,7 @@ public class CheckersGame
         fromColumn = Integer.parseInt(cMove.substring(2, 3));
         toRow = Integer.parseInt(cMove.substring(4, 5));
         toColumn = Integer.parseInt(cMove.substring(6));
-        pieces.get(findPieceID(fromRow, fromColumn)).setRow(toRow);
-        pieces.get(findPieceID(toRow, fromColumn)).setColumn(toColumn);
+        pieces.get(findPieceID(fromRow, fromColumn)).setPosition(toRow, toColumn);
         if (toRow == 1 && !pieces.get(findPieceID(toRow, toColumn)).isRed())
         {
             pieces.get(findPieceID(toRow, toColumn)).setKing(true);
@@ -193,7 +196,7 @@ public class CheckersGame
         if (Math.abs(toRow-fromRow) == 2)
         {   
             pieces.remove(findPieceID(fromRow+(toRow-fromRow)/2, fromColumn+(toColumn-fromColumn)/2));
-        }
+        }        
     }
     
     public void addMove(int fromRow, int fromColumn, int toRow, int toColumn) {
@@ -249,6 +252,11 @@ public class CheckersGame
                 }
             }
         } while (!isValid);
+    }
+    
+    public void resetMoves() {
+        moves = new ArrayList<>(0);
+        currentMove = 0;
     }
     
     public boolean isDoubleJumpPossible(boolean isRedTurn, int jumpID) {
@@ -370,7 +378,7 @@ public class CheckersGame
         String currentLine;
         int i;
 
-        moves = new ArrayList<>(0);
+        moves = new ArrayList<>();
         try {
             in = new BufferedReader(new FileReader(fileName + ".che"));
             i = 0;
@@ -380,18 +388,22 @@ public class CheckersGame
             while(!currentLine.equals("End")) {
                 moves.add(currentLine);
                 currentLine = in.readLine();
-                i++;
                 System.out.println(currentLine);
+                i++;
             }
             in.close();
-        } catch (IOException e) {
-            System.out.println(e);
-        }
+        } catch (IOException e) {}
     }
     
+    public void runThrough() {
+        for (int i = 0; i < moves.size(); i++) {
+            turn();
+            currentMove++;
+        }
+            
+    }
     public void printBoard() {
         CheckersBoard print = new CheckersBoard(pieces);
         print.printBoard();
     }
 }
- 
