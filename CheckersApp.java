@@ -240,7 +240,7 @@ public class CheckersApp extends Application{
                     isFirstSelected = true;
                     tiles[(column-1)*8 + (row-1)].setEffect(selected);
                 }
-                if (game.isGameWon(!isRedTurn)) {
+                if (game.isGameWon(isRedTurn)) {
                     System.out.println("Won");
                     isGameRunning = false;
                 }
