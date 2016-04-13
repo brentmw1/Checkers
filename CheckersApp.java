@@ -193,8 +193,9 @@ public class CheckersApp extends Application{
             game.turn();
             clearBoard();
             setPieces();
-            }catch(Exception e){}
             isGameRunning = true;
+            game.incrementMove();
+            }catch(Exception e){}
         });
         updatePlayerNames();
         newButton.setOnAction(event -> {
