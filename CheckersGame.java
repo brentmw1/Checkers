@@ -54,6 +54,10 @@ public class CheckersGame
         mandatoryPieceID = -1;
     }
     
+    public int getNumMoves() {
+        return moves.size();
+    }
+    
     public void setBlackName(String name) {
         blackName = name;
     }
@@ -180,8 +184,7 @@ public class CheckersGame
         fromColumn = Integer.parseInt(cMove.substring(2, 3));
         toRow = Integer.parseInt(cMove.substring(4, 5));
         toColumn = Integer.parseInt(cMove.substring(6));
-        pieces.get(findPieceID(fromRow, fromColumn)).setRow(toRow);
-        pieces.get(findPieceID(toRow, fromColumn)).setColumn(toColumn);
+        pieces.get(findPieceID(fromRow, fromColumn)).setPosition(toRow, toColumn);
         if (toRow == 1 && !pieces.get(findPieceID(toRow, toColumn)).isRed())
         {
             pieces.get(findPieceID(toRow, toColumn)).setKing(true);
@@ -249,6 +252,11 @@ public class CheckersGame
                 }
             }
         } while (!isValid);
+    }
+    
+    public void resetMoves() {
+        moves = new ArrayList<>(0);
+        currentMove = 0;
     }
     
     public boolean isDoubleJumpPossible(boolean isRedTurn, int jumpID) {
@@ -384,9 +392,7 @@ public class CheckersGame
                 System.out.println(currentLine);
             }
             in.close();
-        } catch (IOException e) {
-            System.out.println(e);
-        }
+        } catch (IOException e) {}
     }
     
     public void printBoard() {
